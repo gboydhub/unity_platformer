@@ -13,43 +13,53 @@ public class PlayerMovement : MonoBehaviour
 
     private float dirX = 0f;
 
-    //rivate void UpdateSpriteAnimation();
+    private enum MoveState { idle, running, jumping, falling }
 
-    // Start is called before the first frame update
+    private MoveState movs = MoveState.idle;
     void Start()
     {
         anim = GetComponent<Animator>();
         rb = GetComponent<Rigidbody2D>();
         sprite = GetComponent<SpriteRenderer>();
     }
-
-    // Update is called once per frame
     void Update()
     {
         dirX = Input.GetAxisRaw("Horizontal");
         rb.velocity = new Vector2(dirX * runSpeed, rb.velocity.y);
+
+        if(Input.GetButtonDown("Jump"))
+        {
+            rb.velocity = new Vector2(rb.velocity.y,jumpVel);
+        }
         UpdateSpriteAnimation();
     }
 
     private void UpdateSpriteAnimation()
     {
-        if(Input.GetKeyDown("space")) 
-        {
-            rb.velocity = new Vector2(rb.velocity.y,jumpVel);
-        }
+        MoveState state;
         if(dirX > 0f )
         {
-            anim.SetBool("running", true);
+            state = MoveState.running;
             sprite.flipX = false;
         }
         else if(dirX < 0f)
         {
-            anim.SetBool("running", true);
+            state = MoveState.running;
             sprite.flipX = true;
         }
         else
         {
-            anim.SetBool("running", false);
+            state = MoveState.idle;
         }
+
+        if (rb.velocity.y > .1f)
+        {
+            state = MoveState.jumping;
+        }
+        else if(rb.velocity.y < -.1f)
+        {
+            state = MoveState.falling;
+        }
+        anim.SetInteger("state", (int)state);
     }
 }
