@@ -7,6 +7,8 @@ public class PlayerMovement : MonoBehaviour
 
     [SerializeField] private float runSpeed = 7.0f;
     [SerializeField] private float jumpVel = 18.0f;
+    [SerializeField] private LayerMask jumpableGround;
+    private BoxCollider2D coll;
     private Rigidbody2D rb;
     private Animator anim;
     private SpriteRenderer sprite;
@@ -18,6 +20,7 @@ public class PlayerMovement : MonoBehaviour
     private MoveState movs = MoveState.idle;
     void Start()
     {
+        coll = GetComponent<BoxCollider2D>();
         anim = GetComponent<Animator>();
         rb = GetComponent<Rigidbody2D>();
         sprite = GetComponent<SpriteRenderer>();
@@ -27,7 +30,7 @@ public class PlayerMovement : MonoBehaviour
         dirX = Input.GetAxisRaw("Horizontal");
         rb.velocity = new Vector2(dirX * runSpeed, rb.velocity.y);
 
-        if(Input.GetButtonDown("Jump"))
+        if(Input.GetButtonDown("Jump") && IsGrounded())
         {
             rb.velocity = new Vector2(rb.velocity.y,jumpVel);
         }
@@ -61,5 +64,10 @@ public class PlayerMovement : MonoBehaviour
             state = MoveState.falling;
         }
         anim.SetInteger("state", (int)state);
+    }
+
+    private bool IsGrounded()
+    {
+        return Physics2D.BoxCast(coll.bounds.center, coll.bounds.size, 0f, Vector2.down, .1f, jumpableGround);
     }
 }
