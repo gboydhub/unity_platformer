@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class PlayerMovement : MonoBehaviour
 {
@@ -8,6 +9,7 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float runSpeed = 7.0f;
     [SerializeField] private float jumpVel = 18.0f;
     [SerializeField] private LayerMask jumpableGround;
+    [SerializeField] private LayerMask trapLayer;
     private BoxCollider2D coll;
     private Rigidbody2D rb;
     private Animator anim;
@@ -18,6 +20,7 @@ public class PlayerMovement : MonoBehaviour
     private enum MoveState { idle, running, jumping, falling }
 
     private MoveState movs = MoveState.idle;
+
     void Start()
     {
         coll = GetComponent<BoxCollider2D>();
@@ -39,35 +42,35 @@ public class PlayerMovement : MonoBehaviour
 
     private void UpdateSpriteAnimation()
     {
-        MoveState state;
         if(dirX > 0f )
         {
-            state = MoveState.running;
+            movs = MoveState.running;
             sprite.flipX = false;
         }
         else if(dirX < 0f)
         {
-            state = MoveState.running;
+            movs = MoveState.running;
             sprite.flipX = true;
         }
         else
         {
-            state = MoveState.idle;
+            movs = MoveState.idle;
         }
 
         if (rb.velocity.y > .1f)
         {
-            state = MoveState.jumping;
+            movs = MoveState.jumping;
         }
         else if(rb.velocity.y < -.1f)
         {
-            state = MoveState.falling;
+            movs = MoveState.falling;
         }
-        anim.SetInteger("state", (int)state);
+        anim.SetInteger("state", (int)movs);
     }
 
     private bool IsGrounded()
     {
         return Physics2D.BoxCast(coll.bounds.center, coll.bounds.size, 0f, Vector2.down, .1f, jumpableGround);
     }
+
 }
